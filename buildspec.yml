@@ -3,22 +3,12 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin <ECR-REGISTRY-ID>.dkr.ecr.us-east-1.amazonaws.com
+      - echo "Logging in to Amazon ECR..."
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 730335472116.dkr.ecr.ap-south-1.amazonaws.com
+      - echo "Pulling Docker image..."
+      - docker pull 730335472116.dkr.ecr.ap-south-1.amazonaws.com/styl-shopping-api:v2
   build:
     commands:
-      - echo Building the Docker image...
-      - IMAGE_TAG=$(date +%Y%m%d%H%M%S)
-      - docker build -t <ECR-REGISTRY-ID>.dkr.ecr.us-east-1.amazonaws.com/<REPO-NAME>:${IMAGE_TAG} .
-      - docker tag <ECR-REGISTRY-ID>.dkr.ecr.us-east-1.amazonaws.com/<REPO-NAME>:${IMAGE_TAG} <ECR-REGISTRY-ID>.dkr.ecr.us-east-1.amazonaws.com/<REPO-NAME>:latest
-  post_build:
-    commands:
-      - echo Pushing the Docker image...
-      - docker push <ECR-REGISTRY-ID>.dkr.ecr.us-east-1.amazonaws.com/<REPO-NAME>:${IMAGE_TAG}
-      - docker push <ECR-REGISTRY-ID>.dkr.ecr.us-east-1.amazonaws.com/<REPO-NAME>:latest
-      - echo Updating Kubernetes deployment...
-      - kubectl set image deployment/<DEPLOYMENT-NAME> <CONTAINER-NAME>=<ECR-REGISTRY-ID>.dkr.ecr.us-east-1.amazonaws.com/<REPO-NAME>:${IMAGE_TAG}
-artifacts:
-  files:
-    - '**/*'
+      - echo "Applying Kubernetes manifests..."
+      - kubectl apply -f deployment.yml
 
